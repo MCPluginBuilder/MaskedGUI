@@ -54,6 +54,53 @@
                     </java>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <relocations>
+                                <!-- HSCore License -->
+                                <relocation>
+                                    <pattern>me.hsgamer.hscore.license</pattern>
+                                    <shadedPattern>${license.packageName}</shadedPattern>
+                                </relocation>
+
+                                <!-- HSCore -->
+                                <relocation>
+                                    <pattern>me.hsgamer.hscore</pattern>
+                                    <shadedPattern>me.hsgamer.bettergui.lib.core</shadedPattern>
+                                </relocation>
+
+                                <!-- MineLib -->
+                                <relocation>
+                                    <pattern>io.github.projectunified.minelib</pattern>
+                                    <shadedPattern>me.hsgamer.bettergui.lib.minelib</shadedPattern>
+                                </relocation>
+
+                                <!-- bStats -->
+                                <relocation>
+                                    <pattern>org.bstats</pattern>
+                                    <shadedPattern>me.hsgamer.bettergui.lib.bstats</shadedPattern>
+                                </relocation>
+
+                                <!-- MapTemplate -->
+                                <relocation>
+                                    <pattern>io.github.projectunified.maptemplate</pattern>
+                                    <shadedPattern>me.hsgamer.bettergui.maskedgui.lib.maptemplate</shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -96,6 +143,11 @@
                     <artifactId>hscore-web</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>io.github.projectunified</groupId>
+            <artifactId>map-template</artifactId>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>

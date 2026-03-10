@@ -16,14 +16,13 @@
 package me.hsgamer.bettergui.maskedgui.mask;
 
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
-import me.hsgamer.bettergui.maskedgui.replacer.SimpleVariableValueReplacer;
-import me.hsgamer.bettergui.maskedgui.replacer.ValueReplacer;
 import me.hsgamer.hscore.common.MapUtils;
 
 import java.util.*;
 import java.util.stream.Stream;
 
 public class KeyValueListMask extends ValueListMask<Map<String, String>> {
+    private static final String PREFIX = "key_";
     private List<Map<String, String>> valueList = Collections.emptyList();
 
     public KeyValueListMask(MaskBuilder.Input input) {
@@ -31,18 +30,12 @@ public class KeyValueListMask extends ValueListMask<Map<String, String>> {
     }
 
     @Override
-    protected ValueReplacer<Map<String, String>> createValueReplacer() {
-        return new SimpleVariableValueReplacer<Map<String, String>>() {
-            @Override
-            protected String getPrefix() {
-                return "key";
-            }
-
-            @Override
-            protected String replaceVariable(String argument, Map<String, String> value) {
-                return value.getOrDefault(argument, "");
-            }
-        };
+    protected String replace(String input, Map<String, String> value) {
+        if (!input.startsWith(PREFIX)) {
+            return null;
+        }
+        String key = input.substring(PREFIX.length());
+        return value.getOrDefault(key, "");
     }
 
     @Override

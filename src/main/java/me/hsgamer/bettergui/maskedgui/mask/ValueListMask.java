@@ -15,11 +15,11 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
+import io.github.projectunified.maptemplate.MapTemplate;
 import io.github.projectunified.minelib.scheduler.common.task.Task;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.builder.RequirementBuilder;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
-import me.hsgamer.bettergui.maskedgui.replacer.ValueReplacer;
 import me.hsgamer.bettergui.maskedgui.slot.WrappedMaskSlot;
 import me.hsgamer.bettergui.maskedgui.util.RequirementUtil;
 import me.hsgamer.bettergui.requirement.RequirementApplier;
@@ -42,7 +42,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPaginatedMask> {
-    private final ValueReplacer<T> valueReplacer;
     private final Map<T, ValueEntry<T>> valueEntryMap = new ConcurrentHashMap<>();
     private final Map<UUID, ValueListCache> playerListCacheMap = new ConcurrentHashMap<>();
     private final Function<Runnable, Task> scheduler;
@@ -56,16 +55,14 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
     protected ValueListMask(Function<Runnable, Task> scheduler, MaskBuilder.Input input) {
         super(input);
         this.scheduler = scheduler;
-        this.valueReplacer = createValueReplacer();
     }
 
     protected ValueListMask(MaskBuilder.Input input) {
         super(input);
         this.scheduler = runnable -> SchedulerUtil.async().runTimer(runnable, 0, valueUpdateMillis, TimeUnit.MILLISECONDS);
-        this.valueReplacer = createValueReplacer();
     }
 
-    protected abstract ValueReplacer<T> createValueReplacer();
+    protected abstract String replace(String input, T value);
 
     protected abstract Stream<T> getValueStream();
 
@@ -83,39 +80,16 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
         // EMPTY
     }
 
-    private Object replace(Object obj, T value) {
-        if (obj instanceof String) {
-            return valueReplacer.replace((String) obj, value);
-        } else if (obj instanceof Collection) {
-            List<Object> replaceList = new ArrayList<>();
-            ((Collection<?>) obj).forEach(o -> replaceList.add(replace(o, value)));
-            return replaceList;
-        } else if (obj instanceof Map) {
-            Map<Object, Object> replaceMap = new LinkedHashMap<>();
-            ((Map<?, ?>) obj).forEach((k, v) -> replaceMap.put(k, replace(v, value)));
-            return replaceMap;
-        }
-        return obj;
-    }
-
-    private Map<String, Object> replace(Map<String, Object> map, T value) {
-        Map<String, Object> newMap = new LinkedHashMap<>();
-        map.forEach((k, v) -> newMap.put(k, replace(v, value)));
-        return newMap;
-    }
-
-    private List<String> replace(List<String> list, T value) {
-        List<String> newList = new ArrayList<>();
-        list.forEach(s -> newList.add(valueReplacer.replace(s, value)));
-        return newList;
-    }
-
     private boolean canView(UUID uuid, ValueEntry<T> valueEntry) {
         return valueEntry.activated.get() && canViewValue(uuid, valueEntry.value) && valueEntry.viewPredicate.test(uuid);
     }
 
     private ValueEntry<T> newValueEntry(T value) {
-        Map<String, Object> replacedButtonSettings = replace(templateButton, value);
+        MapTemplate mapTemplate = MapTemplate.builder()
+                .setVariableFunction(input -> replace(input, value))
+                .build();
+
+        Map<String, Object> replacedButtonSettings = MapUtils.castOptionalStringObjectMap(mapTemplate.apply(templateButton)).orElse(templateButton);
         Button button = ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(getMenu(), String.join("_", getName(), getValueIndicator(), getValueAsString(value), "button"), replacedButtonSettings))
                 .map(Button.class::cast)
                 .orElse(Button.EMPTY);
@@ -124,14 +98,13 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
         Predicate<UUID> viewerPredicate = uuid -> true;
 
         if (!viewerConditionTemplate.isEmpty()) {
-            List<String> replacedViewerConditions = replace(viewerConditionTemplate, value);
+            List<String> replacedViewerConditions = CollectionUtils.createStringListFromObject(mapTemplate.apply(viewerConditionTemplate));
             ConditionRequirement viewerCondition = new ConditionRequirement(new RequirementBuilder.Input(getMenu(), "condition", String.join("_", getName(), getValueIndicator(), getValueAsString(value), "condition"), replacedViewerConditions));
-
             viewerPredicate = viewerPredicate.and(uuid -> viewerCondition.check(uuid).isSuccess);
         }
 
         if (!viewerRequirementTemplate.isEmpty()) {
-            Map<String, Object> replacedViewerRequirements = replace(viewerRequirementTemplate, value);
+            Map<String, Object> replacedViewerRequirements = MapUtils.castOptionalStringObjectMap(mapTemplate.apply(viewerRequirementTemplate)).orElse(viewerRequirementTemplate);
             RequirementApplier viewerRequirementApplier = new RequirementApplier(getMenu(), String.join("_", getName(), getValueIndicator(), getValueAsString(value), "viewer"), replacedViewerRequirements);
             viewerPredicate = viewerPredicate.and(uuid -> RequirementUtil.check(uuid, viewerRequirementApplier));
         }

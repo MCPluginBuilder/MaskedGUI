@@ -16,13 +16,10 @@
 package me.hsgamer.bettergui.maskedgui.mask;
 
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
-import me.hsgamer.bettergui.maskedgui.replacer.SimpleValueReplacer;
-import me.hsgamer.bettergui.maskedgui.replacer.ValueReplacer;
 import me.hsgamer.hscore.common.CollectionUtils;
 import me.hsgamer.hscore.common.MapUtils;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class SimpleValueListMask extends ValueListMask<String> {
@@ -33,8 +30,8 @@ public class SimpleValueListMask extends ValueListMask<String> {
     }
 
     @Override
-    protected ValueReplacer<String> createValueReplacer() {
-        return new SimpleValueReplacer<>("{current_value}", Function.identity());
+    protected String replace(String input, String value) {
+        return input.equals("current_value") ? value : null;
     }
 
     @Override
