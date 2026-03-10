@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>MaskedGUI</artifactId>
-    <version>5.2</version>
+    <version>5.3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>MaskedGUI</name>
