@@ -62,7 +62,7 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
         this.scheduler = runnable -> SchedulerUtil.async().runTimer(runnable, 0, valueUpdateMillis, TimeUnit.MILLISECONDS);
     }
 
-    protected abstract String replace(String input, T value);
+    protected abstract Object replace(String input, T value);
 
     protected abstract Stream<T> getValueStream();
 

@@ -19,18 +19,19 @@ import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.hscore.common.MapUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class KeyValueListMask extends ValueListMask<Map<String, String>> {
+public class KeyValueListMask extends ValueListMask<Map<String, Object>> {
     private static final String PREFIX = "key_";
-    private List<Map<String, String>> valueList = Collections.emptyList();
+    private List<Map<String, Object>> valueList = Collections.emptyList();
 
     public KeyValueListMask(MaskBuilder.Input input) {
         super(input);
     }
 
     @Override
-    protected String replace(String input, Map<String, String> value) {
+    protected Object replace(String input, Map<String, Object> value) {
         if (!input.startsWith(PREFIX)) {
             return null;
         }
@@ -39,7 +40,7 @@ public class KeyValueListMask extends ValueListMask<Map<String, String>> {
     }
 
     @Override
-    protected Stream<Map<String, String>> getValueStream() {
+    protected Stream<Map<String, Object>> getValueStream() {
         return valueList.stream();
     }
 
@@ -49,12 +50,12 @@ public class KeyValueListMask extends ValueListMask<Map<String, String>> {
     }
 
     @Override
-    protected boolean isValueActivated(Map<String, String> value) {
+    protected boolean isValueActivated(Map<String, Object> value) {
         return true;
     }
 
     @Override
-    protected boolean canViewValue(UUID uuid, Map<String, String> value) {
+    protected boolean canViewValue(UUID uuid, Map<String, Object> value) {
         return true;
     }
 
@@ -63,31 +64,9 @@ public class KeyValueListMask extends ValueListMask<Map<String, String>> {
         valueList = Optional.ofNullable(MapUtils.getIfFound(section, "values", "value"))
                 .filter(List.class::isInstance)
                 .<List<?>>map(List.class::cast)
-                .map(rawList -> {
-                    List<Map<String, String>> list = new ArrayList<>();
-                    for (Object raw : rawList) {
-                        if (!(raw instanceof Map)) {
-                            continue;
-                        }
-                        Map<?, ?> rawMap = (Map<?, ?>) raw;
-                        Map<String, String> map = new HashMap<>();
-                        for (Map.Entry<?, ?> entry : rawMap.entrySet()) {
-                            String key = Objects.toString(entry.getKey());
-                            Object v = entry.getValue();
-                            String value;
-                            if (v instanceof Collection) {
-                                List<String> stringList = new ArrayList<>();
-                                ((Collection<?>) v).forEach(o -> stringList.add(Objects.toString(o)));
-                                value = String.join("\n", stringList);
-                            } else {
-                                value = v.toString();
-                            }
-                            map.put(key, value);
-                        }
-                        list.add(map);
-                    }
-                    return list;
-                })
-                .orElse(Collections.emptyList());
+                .orElse(Collections.emptyList())
+                .stream()
+                .flatMap(o -> MapUtils.castOptionalStringObjectMap(o, false).map(Stream::of).orElseGet(Stream::empty))
+                .collect(Collectors.toList());
     }
 }
