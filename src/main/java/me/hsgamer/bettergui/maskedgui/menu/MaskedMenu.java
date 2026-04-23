@@ -15,6 +15,9 @@
 */
 package me.hsgamer.bettergui.maskedgui.menu;
 
+import io.github.projectunified.craftux.common.ActionItem;
+import io.github.projectunified.craftux.common.Position;
+import io.github.projectunified.craftux.mask.HybridMask;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
@@ -22,20 +25,25 @@ import me.hsgamer.bettergui.menu.BaseInventoryMenu;
 import me.hsgamer.hscore.collections.map.CaseInsensitiveStringMap;
 import me.hsgamer.hscore.common.MapUtils;
 import me.hsgamer.hscore.config.Config;
-import me.hsgamer.hscore.minecraft.gui.advanced.AdvancedButtonMap;
+import me.hsgamer.hscore.minecraft.gui.button.ButtonMap;
+import me.hsgamer.hscore.minecraft.gui.button.DisplayButton;
+import me.hsgamer.hscore.minecraft.gui.object.InventoryPosition;
+import me.hsgamer.hscore.minecraft.gui.object.InventorySize;
+import me.hsgamer.hscore.minecraft.gui.object.Item;
+import org.bukkit.event.inventory.InventoryType;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Consumer;
 
-public class MaskedMenu extends BaseInventoryMenu<AdvancedButtonMap> {
+public class MaskedMenu extends BaseInventoryMenu<MaskedMenu.CraftUXButtonMap> {
     public MaskedMenu(Config config) {
         super(config);
     }
 
     @Override
-    protected AdvancedButtonMap createButtonMap() {
-        AdvancedButtonMap buttonMap = new AdvancedButtonMap();
+    protected CraftUXButtonMap createButtonMap() {
+        CraftUXButtonMap buttonMap = new CraftUXButtonMap();
         for (Map.Entry<String, Object> entry : configSettings.entrySet()) {
             String key = entry.getKey();
             Optional<Map<String, Object>> optionalValue = MapUtils.castOptionalStringObjectMap(entry.getValue());
@@ -46,20 +54,66 @@ public class MaskedMenu extends BaseInventoryMenu<AdvancedButtonMap> {
                     .build(new MaskBuilder.Input(this, "mask_" + key, values))
                     .ifPresent(mask -> {
                         mask.init();
-                        buttonMap.addMask(mask);
+                        buttonMap.hybridMask.add(mask);
                     });
         }
         return buttonMap;
     }
 
     @Override
-    protected void refreshButtonMapOnCreate(AdvancedButtonMap buttonMap, UUID uuid) {
-        MaskUtil.refreshMasks(uuid, buttonMap.getMasks());
+    protected void refreshButtonMapOnCreate(CraftUXButtonMap buttonMap, UUID uuid) {
+        MaskUtil.refreshMasks(uuid, buttonMap.hybridMask.getElements());
     }
 
     public void handleSignal(UUID uuid, Signal signal) {
-        AdvancedButtonMap buttonMap = getButtonMap();
+        CraftUXButtonMap buttonMap = getButtonMap();
         if (buttonMap == null) return;
-        MaskUtil.handleSignal(uuid, buttonMap.getMasks(), signal);
+        MaskUtil.handleSignal(uuid, buttonMap.hybridMask.getElements(), signal);
+    }
+
+    public int getSlotPerRow() {
+        InventoryType inventoryType = getGUIHolder().getInventoryType();
+        switch (inventoryType) {
+            case CHEST:
+            case ENDER_CHEST:
+            case SHULKER_BOX:
+                return 9;
+            case DISPENSER:
+            case DROPPER:
+            case HOPPER:
+                return 3;
+            default:
+                return 0;
+        }
+    }
+
+    public static class CraftUXButtonMap implements ButtonMap {
+        private final HybridMask hybridMask = new HybridMask();
+
+        @Override
+        public @NotNull Map<@NotNull Integer, @NotNull DisplayButton> getButtons(@NotNull UUID uuid, InventorySize inventorySize) {
+            Map<Position, ActionItem> map = hybridMask.getActionMap(uuid);
+            if (map == null) return Collections.emptyMap();
+            Map<Integer, @NotNull DisplayButton> buttonMap = new HashMap<>();
+            for (Map.Entry<Position, ActionItem> entry : map.entrySet()) {
+                Position position = entry.getKey();
+                ActionItem actionItem = entry.getValue();
+
+                int slot = InventoryPosition.of(position.getX(), position.getY()).toSlot(inventorySize);
+
+                DisplayButton displayButton = new DisplayButton();
+                Object item = actionItem.getItem();
+                if (item instanceof Item) {
+                    displayButton.setItem((Item) item);
+                }
+                Consumer<Object> action = actionItem.getAction();
+                if (action != null) {
+                    displayButton.setAction(action::accept);
+                }
+
+                buttonMap.put(slot, displayButton);
+            }
+            return buttonMap;
+        }
     }
 }

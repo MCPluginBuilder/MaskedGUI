@@ -15,16 +15,17 @@
 */
 package me.hsgamer.bettergui.maskedgui.api.mask;
 
+import io.github.projectunified.craftux.common.ActionItem;
+import io.github.projectunified.craftux.common.Element;
+import io.github.projectunified.craftux.common.Mask;
+import io.github.projectunified.craftux.common.Position;
 import me.hsgamer.bettergui.api.menu.Menu;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
-import me.hsgamer.hscore.minecraft.gui.button.Button;
-import me.hsgamer.hscore.minecraft.gui.mask.Mask;
-import me.hsgamer.hscore.minecraft.gui.object.InventorySize;
-import org.jetbrains.annotations.NotNull;
+import me.hsgamer.bettergui.maskedgui.menu.MaskedMenu;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 public abstract class BaseWrappedMask<T extends Mask> implements WrappedMask {
@@ -54,32 +55,32 @@ public abstract class BaseWrappedMask<T extends Mask> implements WrappedMask {
     }
 
     @Override
-    public Menu getMenu() {
+    public MaskedMenu getMenu() {
         return input.menu;
     }
 
     @Override
-    public Optional<Map<Integer, Button>> generateButtons(@NotNull UUID uuid, @NotNull InventorySize inventorySize) {
-        return mask == null ? Optional.empty() : mask.generateButtons(uuid, inventorySize);
+    public String getName() {
+        return input.name;
     }
 
     @Override
-    public @NotNull String getName() {
-        return input.name;
+    public @Nullable Map<Position, ActionItem> getActionMap(UUID uuid) {
+        return mask == null ? null : mask.getActionMap(uuid);
     }
 
     @Override
     public void init() {
         mask = createMask(input.options);
         if (mask != null) {
-            mask.init();
+            Element.handleIfElement(mask, Element::init);
         }
     }
 
     @Override
     public void stop() {
         if (mask != null) {
-            mask.stop();
+            Element.handleIfElement(mask, Element::stop);
         }
     }
 

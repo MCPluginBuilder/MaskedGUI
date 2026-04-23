@@ -15,14 +15,19 @@
 */
 package me.hsgamer.bettergui.maskedgui.util;
 
+import io.github.projectunified.craftux.common.ActionItem;
 import me.hsgamer.bettergui.api.button.WrappedButton;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
 import me.hsgamer.hscore.collections.map.CaseInsensitiveStringMap;
 import me.hsgamer.hscore.common.MapUtils;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
+import me.hsgamer.hscore.minecraft.gui.button.DisplayButton;
+import me.hsgamer.hscore.minecraft.gui.event.ViewerEvent;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -62,6 +67,28 @@ public final class ButtonUtil {
                 .forEach(button -> button.refresh(uuid));
     }
 
+    public static final class CraftUXButton implements io.github.projectunified.craftux.common.Button {
+        public final WrappedButton original;
+
+        public CraftUXButton(WrappedButton original) {
+            this.original = original;
+        }
+
+        @Override
+        public boolean apply(@NotNull UUID uuid, @NotNull ActionItem actionItem) {
+            DisplayButton displayButton = original.display(uuid);
+            if (displayButton == null) {
+                return false;
+            }
+            actionItem.setItem(displayButton.getItem());
+            Consumer<ViewerEvent> action = displayButton.getAction();
+            if (action != null) {
+                actionItem.setAction(ViewerEvent.class, action);
+            }
+            return true;
+        }
+    }
+
     public static final class ButtonWithInput {
         public final ButtonBuilder.Input input;
         public final WrappedButton button;
@@ -69,6 +96,10 @@ public final class ButtonUtil {
         public ButtonWithInput(ButtonBuilder.Input input, WrappedButton button) {
             this.input = input;
             this.button = button;
+        }
+
+        public CraftUXButton craftUXButton() {
+            return new CraftUXButton(button);
         }
     }
 

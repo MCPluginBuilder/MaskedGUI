@@ -15,11 +15,11 @@
 */
 package me.hsgamer.bettergui.maskedgui.util;
 
+import io.github.projectunified.craftux.common.Mask;
 import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.hscore.common.MapUtils;
-import me.hsgamer.hscore.minecraft.gui.mask.Mask;
 
 import java.util.*;
 
