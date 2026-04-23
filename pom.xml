@@ -19,6 +19,7 @@
 
     <properties>
         <core.version>4.5.7</core.version>
+        <craftux.version>1.6.2</craftux.version>
         <project.mainClass>me.hsgamer.bettergui.maskedgui.MaskedGUI</project.mainClass>
     </properties>
 
@@ -148,6 +149,11 @@
             <groupId>io.github.projectunified</groupId>
             <artifactId>map-template</artifactId>
             <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.projectunified</groupId>
+            <artifactId>craftux-mask</artifactId>
+            <version>${craftux.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
