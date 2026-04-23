@@ -19,14 +19,15 @@ import io.github.projectunified.craftux.common.ActionItem;
 import io.github.projectunified.craftux.common.Element;
 import io.github.projectunified.craftux.common.Mask;
 import io.github.projectunified.craftux.common.Position;
-import me.hsgamer.bettergui.api.menu.Menu;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.menu.MaskedMenu;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public abstract class BaseWrappedMask<T extends Mask> implements WrappedMask {
     private final MaskBuilder.Input input;
@@ -65,8 +66,8 @@ public abstract class BaseWrappedMask<T extends Mask> implements WrappedMask {
     }
 
     @Override
-    public @Nullable Map<Position, ActionItem> getActionMap(UUID uuid) {
-        return mask == null ? null : mask.getActionMap(uuid);
+    public @Nullable Map<Position, Consumer<ActionItem>> apply(@NotNull UUID uuid) {
+        return mask == null ? null : mask.apply(uuid);
     }
 
     @Override

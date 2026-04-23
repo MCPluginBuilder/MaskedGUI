@@ -67,6 +67,13 @@ public final class ButtonUtil {
                 .forEach(button -> button.refresh(uuid));
     }
 
+    public static void refreshCraftUXButtons(UUID uuid, Collection<? extends io.github.projectunified.craftux.common.Button> buttons) {
+        buttons.stream()
+                .filter(CraftUXButton.class::isInstance)
+                .map(CraftUXButton.class::cast)
+                .forEach(craftUXButton -> craftUXButton.original.refresh(uuid));
+    }
+
     public static final class CraftUXButton implements io.github.projectunified.craftux.common.Button {
         public final WrappedButton original;
 

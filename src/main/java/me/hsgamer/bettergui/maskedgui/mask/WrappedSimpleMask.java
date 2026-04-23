@@ -15,30 +15,32 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
+import io.github.projectunified.craftux.mask.MultiPositionMask;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.maskedgui.api.mask.BaseWrappedMask;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.slot.WrappedMaskSlot;
 import me.hsgamer.bettergui.maskedgui.util.ButtonUtil;
-import me.hsgamer.hscore.minecraft.gui.mask.impl.MultiSlotsMask;
 
 import java.util.Map;
 import java.util.UUID;
 
-public class WrappedSimpleMask extends BaseWrappedMask<MultiSlotsMask> {
+public class WrappedSimpleMask extends BaseWrappedMask<MultiPositionMask> {
     public WrappedSimpleMask(MaskBuilder.Input input) {
         super(input);
     }
 
     @Override
-    protected MultiSlotsMask createMask(Map<String, Object> section) {
-        MultiSlotsMask mask = new MultiSlotsMask(getName(), WrappedMaskSlot.of(section, this));
-        ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(getMenu(), getName() + "_button", section)).ifPresent(mask::addButton);
+    protected MultiPositionMask createMask(Map<String, Object> section) {
+        MultiPositionMask mask = new MultiPositionMask(WrappedMaskSlot.of(section, this));
+        ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(getMenu(), getName() + "_button", section))
+                .map(ButtonUtil.CraftUXButton::new)
+                .ifPresent(mask::add);
         return mask;
     }
 
     @Override
-    protected void refresh(MultiSlotsMask mask, UUID uuid) {
-        ButtonUtil.refreshButtons(uuid, mask.getButtons());
+    protected void refresh(MultiPositionMask mask, UUID uuid) {
+        ButtonUtil.refreshCraftUXButtons(uuid, mask.getElements());
     }
 }
