@@ -16,6 +16,7 @@
 package me.hsgamer.bettergui.maskedgui.util;
 
 import io.github.projectunified.craftux.common.ActionItem;
+import io.github.projectunified.craftux.common.Element;
 import me.hsgamer.bettergui.api.button.WrappedButton;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
@@ -24,6 +25,7 @@ import me.hsgamer.hscore.common.MapUtils;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
 import me.hsgamer.hscore.minecraft.gui.button.DisplayButton;
 import me.hsgamer.hscore.minecraft.gui.event.ViewerEvent;
+import me.hsgamer.hscore.ui.property.Initializable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -77,7 +79,7 @@ public final class ButtonUtil {
                 .forEach(button -> button.refresh(uuid));
     }
 
-    public static final class CraftUXButton implements io.github.projectunified.craftux.common.Button {
+    public static final class CraftUXButton implements io.github.projectunified.craftux.common.Button, Element {
         public final Button original;
 
         public CraftUXButton(Button original) {
@@ -96,6 +98,16 @@ public final class ButtonUtil {
                 actionItem.setAction(ViewerEvent.class, action);
             }
             return true;
+        }
+
+        @Override
+        public void init() {
+            original.init();
+        }
+
+        @Override
+        public void stop() {
+            original.stop();
         }
     }
 
