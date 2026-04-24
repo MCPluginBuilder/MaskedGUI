@@ -15,12 +15,12 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
+import io.github.projectunified.craftux.mask.AnimatedMask;
 import me.hsgamer.bettergui.maskedgui.api.mask.BaseWrappedMask;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
 import me.hsgamer.bettergui.util.TickUtil;
-import me.hsgamer.hscore.minecraft.gui.mask.impl.AnimatedMask;
 
 import java.util.Map;
 import java.util.Optional;
@@ -33,8 +33,8 @@ public class WrappedAnimatedMask extends BaseWrappedMask<AnimatedMask> {
 
     @Override
     protected AnimatedMask createMask(Map<String, Object> section) {
-        AnimatedMask mask = new AnimatedMask(getName());
-        mask.addMask(MaskUtil.createChildMasksAsList(this, section));
+        AnimatedMask mask = new AnimatedMask();
+        mask.add(MaskUtil.createChildMasksAsList(this, section));
 
         Optional.ofNullable(section.get("update"))
                 .map(String::valueOf)
@@ -47,11 +47,11 @@ public class WrappedAnimatedMask extends BaseWrappedMask<AnimatedMask> {
 
     @Override
     protected void refresh(AnimatedMask mask, UUID uuid) {
-        MaskUtil.refreshMasks(uuid, mask.getMasks());
+        MaskUtil.refreshMasks(uuid, mask.getElements());
     }
 
     @Override
     protected void handleSignal(AnimatedMask mask, UUID uuid, Signal signal) {
-        MaskUtil.handleSignal(uuid, mask.getMasks(), signal);
+        MaskUtil.handleSignal(uuid, mask.getElements(), signal);
     }
 }

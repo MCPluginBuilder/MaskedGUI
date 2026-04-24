@@ -15,6 +15,7 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
+import io.github.projectunified.craftux.mask.PlaceholderMask;
 import me.hsgamer.bettergui.maskedgui.api.mask.BaseWrappedMask;
 import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
@@ -24,8 +25,6 @@ import me.hsgamer.bettergui.maskedgui.signal.SetMaskSignal;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
 import me.hsgamer.bettergui.maskedgui.util.SignalHandler;
 import me.hsgamer.hscore.common.MapUtils;
-import me.hsgamer.hscore.minecraft.gui.mask.impl.PlaceholderMask;
-import me.hsgamer.hscore.ui.property.Initializable;
 
 import java.util.Collections;
 import java.util.Map;
@@ -35,6 +34,7 @@ import java.util.UUID;
 public class SwitchMask extends BaseWrappedMask<PlaceholderMask> {
     protected final SignalHandler signalHandler = new SignalHandler();
     private Map<String, WrappedMask> childMasks = Collections.emptyMap();
+    private WrappedMask defaultMask;
 
     public SwitchMask(MaskBuilder.Input input) {
         super(input);
@@ -43,12 +43,12 @@ public class SwitchMask extends BaseWrappedMask<PlaceholderMask> {
     @Override
     protected PlaceholderMask createMask(Map<String, Object> section) {
         childMasks = MaskUtil.createChildMasks(this, section);
-
-        PlaceholderMask mask = new PlaceholderMask(getName()).setInitDefaultMask(false);
-        Optional.ofNullable(MapUtils.getIfFound(section, "default", "default-mask"))
+        defaultMask = Optional.ofNullable(MapUtils.getIfFound(section, "default", "default-mask"))
                 .map(String::valueOf)
                 .map(childMasks::get)
-                .ifPresent(mask::setDefaultMask);
+                .orElse(null);
+
+        PlaceholderMask mask = new PlaceholderMask();
 
         signalHandler
                 .setSignal(section, getName())
@@ -66,13 +66,16 @@ public class SwitchMask extends BaseWrappedMask<PlaceholderMask> {
     @Override
     public void init() {
         super.init();
-        childMasks.values().forEach(Initializable::init);
+        childMasks.values().forEach(WrappedMask::init);
+        if (defaultMask != null) {
+            getMask().setDefaultMask(defaultMask);
+        }
     }
 
     @Override
     public void stop() {
         super.stop();
-        childMasks.values().forEach(Initializable::stop);
+        childMasks.values().forEach(WrappedMask::stop);
     }
 
     @Override

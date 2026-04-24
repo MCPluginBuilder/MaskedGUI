@@ -15,11 +15,11 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
+import io.github.projectunified.craftux.mask.HybridMask;
 import me.hsgamer.bettergui.maskedgui.api.mask.BaseWrappedMask;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
-import me.hsgamer.hscore.minecraft.gui.mask.impl.HybridMask;
 
 import java.util.Map;
 import java.util.UUID;
@@ -31,16 +31,18 @@ public class WrappedHybridMask extends BaseWrappedMask<HybridMask> {
 
     @Override
     protected HybridMask createMask(Map<String, Object> section) {
-        return new HybridMask(getName()).addMask(MaskUtil.createChildMasksAsList(this, section));
+        HybridMask mask = new HybridMask();
+        mask.add(MaskUtil.createChildMasksAsList(this, section));
+        return mask;
     }
 
     @Override
     protected void handleSignal(HybridMask mask, UUID uuid, Signal signal) {
-        MaskUtil.handleSignal(uuid, mask.getMasks(), signal);
+        MaskUtil.handleSignal(uuid, mask.getElements(), signal);
     }
 
     @Override
     protected void refresh(HybridMask mask, UUID uuid) {
-        MaskUtil.refreshMasks(uuid, mask.getMasks());
+        MaskUtil.refreshMasks(uuid, mask.getElements());
     }
 }

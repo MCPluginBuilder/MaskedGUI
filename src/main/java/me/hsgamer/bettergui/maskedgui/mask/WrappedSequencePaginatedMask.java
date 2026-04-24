@@ -15,27 +15,36 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
+import io.github.projectunified.craftux.common.Button;
+import io.github.projectunified.craftux.mask.SequencePaginatedMask;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
-import me.hsgamer.bettergui.maskedgui.slot.WrappedMaskSlot;
 import me.hsgamer.bettergui.maskedgui.util.ButtonUtil;
-import me.hsgamer.hscore.minecraft.gui.mask.impl.StaticSequencePaginatedMask;
+import me.hsgamer.bettergui.maskedgui.util.MaskSlotUtil;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-public class WrappedSequencePaginatedMask extends WrappedPaginatedMask<StaticSequencePaginatedMask> {
+public class WrappedSequencePaginatedMask extends WrappedPaginatedMask<SequencePaginatedMask> {
     public WrappedSequencePaginatedMask(MaskBuilder.Input input) {
         super(input);
     }
 
     @Override
-    protected StaticSequencePaginatedMask createPaginatedMask(Map<String, Object> section) {
-        return new StaticSequencePaginatedMask(getName(), WrappedMaskSlot.of(section, this))
-                .addButton(ButtonUtil.createChildButtons(this, section).buttonList());
+    protected SequencePaginatedMask createPaginatedMask(Map<String, Object> section) {
+        List<Button> buttons = ButtonUtil.createChildButtons(this, section).valueStream().<Button>map(ButtonUtil.ButtonWithInput::craftUXButton).collect(Collectors.toList());
+        return new SequencePaginatedMask(MaskSlotUtil.of(section, this)) {
+            @Override
+            public @NotNull List<Button> getButtons(@NotNull UUID uuid) {
+                return buttons;
+            }
+        };
     }
 
     @Override
-    protected void refresh(StaticSequencePaginatedMask mask, UUID uuid) {
-        ButtonUtil.refreshButtons(uuid, mask.getButtons(uuid));
+    protected void refresh(SequencePaginatedMask mask, UUID uuid) {
+        ButtonUtil.refreshCraftUXButtons(uuid, mask.getButtons(uuid));
     }
 }

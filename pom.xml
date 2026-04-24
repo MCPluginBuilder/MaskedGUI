@@ -97,6 +97,12 @@
                                     <pattern>io.github.projectunified.maptemplate</pattern>
                                     <shadedPattern>me.hsgamer.bettergui.maskedgui.lib.maptemplate</shadedPattern>
                                 </relocation>
+
+                                <!-- CraftUX -->
+                                <relocation>
+                                    <pattern>io.github.projectunified.craftux</pattern>
+                                    <shadedPattern>me.hsgamer.bettergui.maskedgui.lib.craftux</shadedPattern>
+                                </relocation>
                             </relocations>
                         </configuration>
                     </execution>
@@ -106,25 +112,6 @@
     </build>
 
     <dependencies>
-        <dependency>
-            <groupId>me.hsgamer</groupId>
-            <artifactId>hscore-minecraft-gui-advanced</artifactId>
-            <version>${core.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>me.hsgamer</groupId>
-                    <artifactId>hscore-minecraft-gui</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>me.hsgamer</groupId>
-                    <artifactId>hscore-ui</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>me.hsgamer</groupId>
-                    <artifactId>hscore-animate</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
         <dependency>
             <groupId>me.hsgamer</groupId>
             <artifactId>hscore-license-spigotmc</artifactId>

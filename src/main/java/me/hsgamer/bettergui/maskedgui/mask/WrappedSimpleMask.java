@@ -19,8 +19,8 @@ import io.github.projectunified.craftux.mask.MultiPositionMask;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.maskedgui.api.mask.BaseWrappedMask;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
-import me.hsgamer.bettergui.maskedgui.slot.WrappedMaskSlot;
 import me.hsgamer.bettergui.maskedgui.util.ButtonUtil;
+import me.hsgamer.bettergui.maskedgui.util.MaskSlotUtil;
 
 import java.util.Map;
 import java.util.UUID;
@@ -32,7 +32,7 @@ public class WrappedSimpleMask extends BaseWrappedMask<MultiPositionMask> {
 
     @Override
     protected MultiPositionMask createMask(Map<String, Object> section) {
-        MultiPositionMask mask = new MultiPositionMask(WrappedMaskSlot.of(section, this));
+        MultiPositionMask mask = new MultiPositionMask(MaskSlotUtil.of(section, this));
         ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(getMenu(), getName() + "_button", section))
                 .map(ButtonUtil.CraftUXButton::new)
                 .ifPresent(mask::add);

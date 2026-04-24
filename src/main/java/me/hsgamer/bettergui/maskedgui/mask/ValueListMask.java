@@ -15,12 +15,14 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
+import io.github.projectunified.craftux.mask.ButtonPaginatedMask;
 import io.github.projectunified.maptemplate.MapTemplate;
 import io.github.projectunified.minelib.scheduler.common.task.Task;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.builder.RequirementBuilder;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
-import me.hsgamer.bettergui.maskedgui.slot.WrappedMaskSlot;
+import me.hsgamer.bettergui.maskedgui.util.ButtonUtil;
+import me.hsgamer.bettergui.maskedgui.util.MaskSlotUtil;
 import me.hsgamer.bettergui.maskedgui.util.RequirementUtil;
 import me.hsgamer.bettergui.requirement.RequirementApplier;
 import me.hsgamer.bettergui.requirement.type.ConditionRequirement;
@@ -29,7 +31,6 @@ import me.hsgamer.bettergui.util.TickUtil;
 import me.hsgamer.hscore.common.CollectionUtils;
 import me.hsgamer.hscore.common.MapUtils;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
-import me.hsgamer.hscore.minecraft.gui.mask.impl.ButtonPaginatedMask;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -155,10 +156,10 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
                 .filter(n -> n > 0)
                 .orElse(50L);
         this.configure(section);
-        return new ButtonPaginatedMask(getName(), WrappedMaskSlot.of(section, this)) {
+        return new ButtonPaginatedMask(MaskSlotUtil.of(section, this)) {
             @Override
-            public @NotNull List<@NotNull Button> getButtons(@NotNull UUID uuid) {
-                return getPlayerButtons(uuid);
+            public @NotNull List<io.github.projectunified.craftux.common.Button> getButtons(@NotNull UUID uuid) {
+                return getPlayerButtons(uuid).stream().map(ButtonUtil.CraftUXButton::new).collect(Collectors.toList());
             }
         };
     }

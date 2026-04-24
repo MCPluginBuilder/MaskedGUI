@@ -15,18 +15,21 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
+import io.github.projectunified.craftux.common.ActionItem;
+import io.github.projectunified.craftux.common.Position;
 import me.hsgamer.bettergui.api.button.WrappedButton;
-import me.hsgamer.bettergui.api.menu.Menu;
 import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
+import me.hsgamer.bettergui.maskedgui.menu.MaskedMenu;
 import me.hsgamer.bettergui.maskedgui.util.ButtonUtil;
 import me.hsgamer.hscore.common.CollectionUtils;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
 import me.hsgamer.hscore.minecraft.gui.object.InventoryPosition;
-import me.hsgamer.hscore.minecraft.gui.object.InventorySize;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class PatternMask implements WrappedMask {
@@ -38,14 +41,19 @@ public class PatternMask implements WrappedMask {
     }
 
     @Override
-    public Menu getMenu() {
+    public MaskedMenu getMenu() {
         return input.menu;
     }
 
     @Override
-    public Optional<Map<Integer, Button>> generateButtons(@NotNull UUID uuid, @NotNull InventorySize inventorySize) {
-        Map<Integer, Button> buttons = buttonMap.entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey().toSlot(inventorySize), Map.Entry::getValue, (a, b) -> b));
-        return Optional.of(buttons);
+    public @Nullable Map<Position, Consumer<ActionItem>> apply(@NotNull UUID uuid) {
+        return buttonMap.entrySet().stream().collect(Collectors.toMap(
+                entry -> {
+                    InventoryPosition inventoryPosition = entry.getKey();
+                    return Position.of(inventoryPosition.getX(), inventoryPosition.getY());
+                },
+                entry -> new ButtonUtil.CraftUXButton(entry.getValue()).apply(uuid)
+        ));
     }
 
     @Override

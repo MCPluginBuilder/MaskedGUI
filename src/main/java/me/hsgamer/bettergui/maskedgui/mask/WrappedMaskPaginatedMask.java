@@ -15,31 +15,41 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
+import io.github.projectunified.craftux.common.Mask;
+import io.github.projectunified.craftux.mask.MaskPaginatedMask;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
-import me.hsgamer.hscore.minecraft.gui.mask.impl.StaticMaskPaginatedMask;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-public class WrappedMaskPaginatedMask extends WrappedPaginatedMask<StaticMaskPaginatedMask> {
+public class WrappedMaskPaginatedMask extends WrappedPaginatedMask<MaskPaginatedMask> {
     public WrappedMaskPaginatedMask(MaskBuilder.Input input) {
         super(input);
     }
 
     @Override
-    protected StaticMaskPaginatedMask createPaginatedMask(Map<String, Object> section) {
-        return new StaticMaskPaginatedMask(getName()).addMask(MaskUtil.createChildMasksAsList(this, section));
+    protected MaskPaginatedMask createPaginatedMask(Map<String, Object> section) {
+        List<Mask> masks = MaskUtil.createChildMasksAsList(this, section).stream().map(Mask.class::cast).collect(Collectors.toList());
+        return new MaskPaginatedMask() {
+            @Override
+            public @NotNull List<Mask> getMasks(@NotNull UUID uuid) {
+                return masks;
+            }
+        };
     }
 
     @Override
-    protected void refresh(StaticMaskPaginatedMask mask, UUID uuid) {
+    protected void refresh(MaskPaginatedMask mask, UUID uuid) {
         MaskUtil.refreshMasks(uuid, mask.getMasks(uuid));
     }
 
     @Override
-    protected void handleSignal(StaticMaskPaginatedMask mask, UUID uuid, Signal signal) {
+    protected void handleSignal(MaskPaginatedMask mask, UUID uuid, Signal signal) {
         super.handleSignal(mask, uuid, signal);
         MaskUtil.handleSignal(uuid, mask.getMasks(uuid), signal);
     }

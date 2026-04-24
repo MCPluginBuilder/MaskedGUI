@@ -15,6 +15,7 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
+import io.github.projectunified.craftux.mask.PaginatedMask;
 import me.hsgamer.bettergui.maskedgui.api.mask.BaseWrappedMask;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
@@ -23,7 +24,6 @@ import me.hsgamer.bettergui.maskedgui.signal.RefreshMaskSignal;
 import me.hsgamer.bettergui.maskedgui.signal.SetPageSignal;
 import me.hsgamer.bettergui.maskedgui.util.SignalHandler;
 import me.hsgamer.hscore.common.StringReplacer;
-import me.hsgamer.hscore.minecraft.gui.mask.impl.PaginatedMask;
 
 import java.util.Map;
 import java.util.Optional;

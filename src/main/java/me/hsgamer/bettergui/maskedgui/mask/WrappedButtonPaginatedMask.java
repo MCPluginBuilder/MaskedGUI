@@ -15,27 +15,36 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
+import io.github.projectunified.craftux.common.Button;
+import io.github.projectunified.craftux.mask.ButtonPaginatedMask;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
-import me.hsgamer.bettergui.maskedgui.slot.WrappedMaskSlot;
 import me.hsgamer.bettergui.maskedgui.util.ButtonUtil;
-import me.hsgamer.hscore.minecraft.gui.mask.impl.StaticButtonPaginatedMask;
+import me.hsgamer.bettergui.maskedgui.util.MaskSlotUtil;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-public class WrappedButtonPaginatedMask extends WrappedPaginatedMask<StaticButtonPaginatedMask> {
+public class WrappedButtonPaginatedMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
     public WrappedButtonPaginatedMask(MaskBuilder.Input input) {
         super(input);
     }
 
     @Override
-    protected StaticButtonPaginatedMask createPaginatedMask(Map<String, Object> section) {
-        return new StaticButtonPaginatedMask(getName(), WrappedMaskSlot.of(section, this))
-                .addButton(ButtonUtil.createChildButtons(this, section).buttonList());
+    protected ButtonPaginatedMask createPaginatedMask(Map<String, Object> section) {
+        List<Button> buttons = ButtonUtil.createChildButtons(this, section).valueStream().<Button>map(ButtonUtil.ButtonWithInput::craftUXButton).collect(Collectors.toList());
+        return new ButtonPaginatedMask(MaskSlotUtil.of(section, this)) {
+            @Override
+            public @NotNull List<Button> getButtons(@NotNull UUID uuid) {
+                return buttons;
+            }
+        };
     }
 
     @Override
-    protected void refresh(StaticButtonPaginatedMask mask, UUID uuid) {
-        ButtonUtil.refreshButtons(uuid, mask.getButtons(uuid));
+    protected void refresh(ButtonPaginatedMask mask, UUID uuid) {
+        ButtonUtil.refreshCraftUXButtons(uuid, mask.getButtons(uuid));
     }
 }

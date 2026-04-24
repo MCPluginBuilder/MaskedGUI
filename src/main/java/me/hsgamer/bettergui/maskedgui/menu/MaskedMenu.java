@@ -87,6 +87,20 @@ public class MaskedMenu extends BaseInventoryMenu<MaskedMenu.CraftUXButtonMap> {
         }
     }
 
+    public InventorySize makeFakeInventorySize() {
+        return new InventorySize() {
+            @Override
+            public int getSize() {
+                return 54;
+            }
+
+            @Override
+            public int getSlotPerRow() {
+                return MaskedMenu.this.getSlotPerRow();
+            }
+        };
+    }
+
     public static class CraftUXButtonMap implements ButtonMap {
         private final HybridMask hybridMask = new HybridMask();
 

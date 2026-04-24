@@ -15,11 +15,11 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
+import io.github.projectunified.craftux.mask.ListMask;
 import me.hsgamer.bettergui.maskedgui.api.mask.BaseWrappedMask;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
-import me.hsgamer.hscore.minecraft.gui.mask.impl.ListMask;
 
 import java.util.Map;
 import java.util.UUID;
@@ -31,16 +31,18 @@ public class WrappedListMask extends BaseWrappedMask<ListMask> {
 
     @Override
     protected ListMask createMask(Map<String, Object> section) {
-        return new ListMask(getName()).addMask(MaskUtil.createChildMasksAsList(this, section));
+        ListMask mask = new ListMask();
+        mask.add(MaskUtil.createChildMasksAsList(this, section));
+        return mask;
     }
 
     @Override
     protected void refresh(ListMask mask, UUID uuid) {
-        MaskUtil.refreshMasks(uuid, mask.getMasks());
+        MaskUtil.refreshMasks(uuid, mask.getElements());
     }
 
     @Override
     protected void handleSignal(ListMask mask, UUID uuid, Signal signal) {
-        MaskUtil.handleSignal(uuid, mask.getMasks(), signal);
+        MaskUtil.handleSignal(uuid, mask.getElements(), signal);
     }
 }

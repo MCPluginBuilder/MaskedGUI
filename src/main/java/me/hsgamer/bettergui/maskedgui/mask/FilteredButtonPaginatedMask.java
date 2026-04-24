@@ -15,18 +15,18 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
+import io.github.projectunified.craftux.mask.ButtonPaginatedMask;
 import me.hsgamer.bettergui.api.button.BaseWrappedButton;
 import me.hsgamer.bettergui.api.button.WrappedButton;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
-import me.hsgamer.bettergui.maskedgui.slot.WrappedMaskSlot;
 import me.hsgamer.bettergui.maskedgui.util.ButtonUtil;
+import me.hsgamer.bettergui.maskedgui.util.MaskSlotUtil;
 import me.hsgamer.bettergui.maskedgui.util.RequirementUtil;
 import me.hsgamer.bettergui.requirement.RequirementApplier;
 import me.hsgamer.bettergui.util.TickUtil;
 import me.hsgamer.hscore.collections.map.CaseInsensitiveStringLinkedMap;
 import me.hsgamer.hscore.common.MapUtils;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
-import me.hsgamer.hscore.minecraft.gui.mask.impl.ButtonPaginatedMask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -90,10 +90,10 @@ public class FilteredButtonPaginatedMask extends WrappedPaginatedMask<ButtonPagi
                 })
                 .forEach(buttonWithFilterList::add);
 
-        return new ButtonPaginatedMask(getName(), WrappedMaskSlot.of(section, this)) {
+        return new ButtonPaginatedMask(MaskSlotUtil.of(section, this)) {
             @Override
-            public @NotNull List<@NotNull Button> getButtons(@NotNull UUID uuid) {
-                return getPlayerButtons(uuid);
+            public @NotNull List<io.github.projectunified.craftux.common.Button> getButtons(@NotNull UUID uuid) {
+                return getPlayerButtons(uuid).stream().map(ButtonUtil.CraftUXButton::new).collect(Collectors.toList());
             }
         };
     }

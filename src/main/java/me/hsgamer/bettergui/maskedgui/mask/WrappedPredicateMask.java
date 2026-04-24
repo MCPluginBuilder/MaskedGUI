@@ -15,6 +15,7 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
+import io.github.projectunified.craftux.mask.PredicateMask;
 import me.hsgamer.bettergui.api.requirement.Requirement;
 import me.hsgamer.bettergui.maskedgui.api.mask.BaseWrappedMask;
 import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
@@ -24,7 +25,6 @@ import me.hsgamer.bettergui.requirement.RequirementApplier;
 import me.hsgamer.bettergui.util.ProcessApplierConstants;
 import me.hsgamer.bettergui.util.SchedulerUtil;
 import me.hsgamer.hscore.common.MapUtils;
-import me.hsgamer.hscore.minecraft.gui.mask.impl.PredicateMask;
 import me.hsgamer.hscore.task.BatchRunnable;
 
 import java.util.Map;
@@ -42,7 +42,7 @@ public class WrappedPredicateMask extends BaseWrappedMask<PredicateMask> {
 
     @Override
     protected PredicateMask createMask(Map<String, Object> section) {
-        PredicateMask predicateMask = new PredicateMask(getName());
+        PredicateMask predicateMask = new PredicateMask();
 
         boolean checkOnlyOnCreation = Optional.ofNullable(section.get("check-only-on-creation")).map(String::valueOf).map(Boolean::parseBoolean).orElse(false);
         Optional.ofNullable(MapUtils.getIfFound(section, "requirement", "view-requirement"))
@@ -80,11 +80,11 @@ public class WrappedPredicateMask extends BaseWrappedMask<PredicateMask> {
     @Override
     protected void refresh(PredicateMask mask, UUID uuid) {
         checked.remove(uuid);
-        Optional.of(mask.getMask())
+        Optional.ofNullable(mask.getMask())
                 .filter(WrappedMask.class::isInstance)
                 .map(WrappedMask.class::cast)
                 .ifPresent(wrappedMask -> wrappedMask.refresh(uuid));
-        Optional.of(mask.getFallbackMask())
+        Optional.ofNullable(mask.getFallbackMask())
                 .filter(WrappedMask.class::isInstance)
                 .map(WrappedMask.class::cast)
                 .ifPresent(wrappedMask -> wrappedMask.refresh(uuid));
@@ -92,11 +92,11 @@ public class WrappedPredicateMask extends BaseWrappedMask<PredicateMask> {
 
     @Override
     protected void handleSignal(PredicateMask mask, UUID uuid, Signal signal) {
-        Optional.of(mask.getMask())
+        Optional.ofNullable(mask.getMask())
                 .filter(WrappedMask.class::isInstance)
                 .map(WrappedMask.class::cast)
                 .ifPresent(wrappedMask -> wrappedMask.handleSignal(uuid, signal));
-        Optional.of(mask.getFallbackMask())
+        Optional.ofNullable(mask.getFallbackMask())
                 .filter(WrappedMask.class::isInstance)
                 .map(WrappedMask.class::cast)
                 .ifPresent(wrappedMask -> wrappedMask.handleSignal(uuid, signal));

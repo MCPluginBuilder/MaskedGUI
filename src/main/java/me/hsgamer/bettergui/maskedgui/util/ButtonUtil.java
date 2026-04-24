@@ -71,13 +71,16 @@ public final class ButtonUtil {
         buttons.stream()
                 .filter(CraftUXButton.class::isInstance)
                 .map(CraftUXButton.class::cast)
-                .forEach(craftUXButton -> craftUXButton.original.refresh(uuid));
+                .map(craftUXButton -> craftUXButton.original)
+                .filter(WrappedButton.class::isInstance)
+                .map(WrappedButton.class::cast)
+                .forEach(button -> button.refresh(uuid));
     }
 
     public static final class CraftUXButton implements io.github.projectunified.craftux.common.Button {
-        public final WrappedButton original;
+        public final Button original;
 
-        public CraftUXButton(WrappedButton original) {
+        public CraftUXButton(Button original) {
             this.original = original;
         }
 
@@ -131,6 +134,14 @@ public final class ButtonUtil {
 
         public List<ButtonWithInput> list() {
             return valueStream().collect(Collectors.toList());
+        }
+
+        public Map<String, CraftUXButton> craftUXButtonMap() {
+            return map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().craftUXButton(), (a, b) -> b, LinkedHashMap::new));
+        }
+
+        public List<CraftUXButton> craftUXButtonList() {
+            return valueStream().map(ButtonWithInput::craftUXButton).collect(Collectors.toList());
         }
     }
 }

@@ -15,27 +15,31 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
+import io.github.projectunified.craftux.common.ActionItem;
+import io.github.projectunified.craftux.common.Position;
 import me.hsgamer.bettergui.api.button.WrappedButton;
-import me.hsgamer.bettergui.api.menu.Menu;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
-import me.hsgamer.bettergui.maskedgui.slot.WrappedMaskSlot;
+import me.hsgamer.bettergui.maskedgui.menu.MaskedMenu;
+import me.hsgamer.bettergui.maskedgui.util.ButtonUtil;
+import me.hsgamer.bettergui.maskedgui.util.MaskSlotUtil;
 import me.hsgamer.bettergui.util.StringReplacerApplier;
 import me.hsgamer.hscore.common.MapUtils;
 import me.hsgamer.hscore.common.Validate;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
-import me.hsgamer.hscore.minecraft.gui.mask.MaskSlot;
-import me.hsgamer.hscore.minecraft.gui.object.InventorySize;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class ProgressMask implements WrappedMask {
-    private final Menu menu;
+    private final MaskedMenu menu;
     private final String name;
     private final Map<String, Object> section;
-    private MaskSlot maskSlot = MaskSlot.of();
+    private Function<UUID, List<Position>> maskSlot = uuid -> Collections.emptyList();
     private String currentValue = "0";
     private String maxValue = "100";
     private Button completeButton = Button.EMPTY;
@@ -48,15 +52,15 @@ public class ProgressMask implements WrappedMask {
     }
 
     @Override
-    public Menu getMenu() {
+    public MaskedMenu getMenu() {
         return menu;
     }
 
     @Override
-    public Optional<Map<Integer, Button>> generateButtons(@NotNull UUID uuid, @NotNull InventorySize inventorySize) {
+    public @Nullable Map<Position, Consumer<ActionItem>> apply(@NotNull UUID uuid) {
         String parsedCurrentValue = StringReplacerApplier.replace(currentValue, uuid, this);
         String parsedMaxValue = StringReplacerApplier.replace(maxValue, uuid, this);
-        List<Integer> slots = maskSlot.getSlots(uuid, inventorySize);
+        List<Position> slots = maskSlot.apply(uuid);
 
         double current = Validate.getNumber(parsedCurrentValue).map(Number::doubleValue).orElse(0.0);
         double max = Validate.getNumber(parsedMaxValue).map(Number::doubleValue).orElse(100.0);
@@ -65,14 +69,14 @@ public class ProgressMask implements WrappedMask {
         int completeSize = max <= 0 || current < 0 ? 0 : (int) Math.round(current / max * slotsSize);
         completeSize = Math.min(completeSize, slotsSize);
 
-        Map<Integer, Button> buttonMap = new HashMap<>();
+        Map<Position, Consumer<ActionItem>> buttonMap = new HashMap<>();
         for (int i = 0; i < completeSize; i++) {
-            buttonMap.put(slots.get(i), completeButton);
+            buttonMap.put(slots.get(i), new ButtonUtil.CraftUXButton(completeButton).apply(uuid));
         }
         for (int i = completeSize; i < slotsSize; i++) {
-            buttonMap.put(slots.get(i), incompleteButton);
+            buttonMap.put(slots.get(i), new ButtonUtil.CraftUXButton(incompleteButton).apply(uuid));
         }
-        return Optional.of(buttonMap);
+        return buttonMap;
     }
 
     @Override
@@ -94,7 +98,7 @@ public class ProgressMask implements WrappedMask {
     public void init() {
         currentValue = Objects.toString(MapUtils.getIfFoundOrDefault(section, currentValue, "current-value", "current"), currentValue);
         maxValue = Objects.toString(MapUtils.getIfFoundOrDefault(section, maxValue, "max-value", "max"), maxValue);
-        maskSlot = WrappedMaskSlot.of(section, this);
+        maskSlot = MaskSlotUtil.of(section, this);
 
         completeButton = MapUtils.castOptionalStringObjectMap(MapUtils.getIfFound(section, "complete-button", "complete", "current-button"))
                 .flatMap(map -> ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(menu, name + "_complete_button", map)))

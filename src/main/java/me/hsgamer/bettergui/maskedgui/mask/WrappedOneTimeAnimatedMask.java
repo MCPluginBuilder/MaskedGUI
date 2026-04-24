@@ -15,6 +15,8 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
+import io.github.projectunified.craftux.animation.AnimationMode;
+import io.github.projectunified.craftux.mask.AnimatedMask;
 import me.hsgamer.bettergui.maskedgui.api.mask.BaseWrappedMask;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
@@ -23,13 +25,12 @@ import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
 import me.hsgamer.bettergui.maskedgui.util.SignalHandler;
 import me.hsgamer.bettergui.util.TickUtil;
 import me.hsgamer.hscore.common.MapUtils;
-import me.hsgamer.hscore.minecraft.gui.mask.impl.OneTimeAnimatedMask;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-public class WrappedOneTimeAnimatedMask extends BaseWrappedMask<OneTimeAnimatedMask> {
+public class WrappedOneTimeAnimatedMask extends BaseWrappedMask<AnimatedMask> {
     private final SignalHandler signalHandler = new SignalHandler();
 
     public WrappedOneTimeAnimatedMask(MaskBuilder.Input input) {
@@ -37,19 +38,20 @@ public class WrappedOneTimeAnimatedMask extends BaseWrappedMask<OneTimeAnimatedM
     }
 
     @Override
-    protected OneTimeAnimatedMask createMask(Map<String, Object> section) {
-        OneTimeAnimatedMask mask = new OneTimeAnimatedMask(getName());
-        mask.addMask(MaskUtil.createChildMasksAsList(this, section));
+    protected AnimatedMask createMask(Map<String, Object> section) {
+        AnimatedMask mask = new AnimatedMask();
+        mask.add(MaskUtil.createChildMasksAsList(this, section));
 
         Optional.ofNullable(section.get("update"))
                 .map(String::valueOf)
                 .flatMap(TickUtil::toMillis)
                 .filter(n -> n > 0)
                 .ifPresent(mask::setPeriodMillis);
-        Optional.ofNullable(MapUtils.getIfFound(section, "view-last", "keep-last", "last"))
+        boolean viewLast = Optional.ofNullable(MapUtils.getIfFound(section, "view-last", "keep-last", "last"))
                 .map(String::valueOf)
                 .map(Boolean::parseBoolean)
-                .ifPresent(mask::setViewLast);
+                .orElse(false);
+        mask.setMode(viewLast ? AnimationMode.ONE_TIME_KEEP_LAST : AnimationMode.ONE_TIME);
 
         signalHandler
                 .setSignal(section, getName())
@@ -59,15 +61,15 @@ public class WrappedOneTimeAnimatedMask extends BaseWrappedMask<OneTimeAnimatedM
     }
 
     @Override
-    protected void refresh(OneTimeAnimatedMask mask, UUID uuid) {
+    protected void refresh(AnimatedMask mask, UUID uuid) {
         mask.reset(uuid);
-        MaskUtil.refreshMasks(uuid, mask.getMasks());
+        MaskUtil.refreshMasks(uuid, mask.getElements());
     }
 
     @Override
-    protected void handleSignal(OneTimeAnimatedMask mask, UUID uuid, Signal signal) {
+    protected void handleSignal(AnimatedMask mask, UUID uuid, Signal signal) {
         signalHandler.handle(uuid, signal);
-        MaskUtil.handleSignal(uuid, mask.getMasks(), signal);
+        MaskUtil.handleSignal(uuid, mask.getElements(), signal);
     }
 
     @Override
