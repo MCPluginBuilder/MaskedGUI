@@ -16,6 +16,7 @@
 package me.hsgamer.bettergui.maskedgui.mask;
 
 import io.github.projectunified.craftux.common.Button;
+import io.github.projectunified.craftux.common.Element;
 import io.github.projectunified.craftux.mask.ButtonPaginatedMask;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.ButtonUtil;
@@ -28,13 +29,15 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class WrappedButtonPaginatedMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
+    private List<Button> buttons;
+
     public WrappedButtonPaginatedMask(MaskBuilder.Input input) {
         super(input);
     }
 
     @Override
     protected ButtonPaginatedMask createPaginatedMask(Map<String, Object> section) {
-        List<Button> buttons = ButtonUtil.createChildButtons(this, section).valueStream().<Button>map(ButtonUtil.ButtonWithInput::craftUXButton).collect(Collectors.toList());
+        buttons = ButtonUtil.createChildButtons(this, section).valueStream().<Button>map(ButtonUtil.ButtonWithInput::craftUXButton).collect(Collectors.toList());
         return new ButtonPaginatedMask(MaskSlotUtil.of(section, this)) {
             @Override
             public @NotNull List<Button> getButtons(@NotNull UUID uuid) {
@@ -46,5 +49,17 @@ public class WrappedButtonPaginatedMask extends WrappedPaginatedMask<ButtonPagin
     @Override
     protected void refresh(ButtonPaginatedMask mask, UUID uuid) {
         ButtonUtil.refreshCraftUXButtons(uuid, mask.getButtons(uuid));
+    }
+
+    @Override
+    public void init() {
+        super.init();
+        Element.handleIfElement(buttons, Element::init);
+    }
+
+    @Override
+    public void stop() {
+        Element.handleIfElement(buttons, Element::stop);
+        super.stop();
     }
 }

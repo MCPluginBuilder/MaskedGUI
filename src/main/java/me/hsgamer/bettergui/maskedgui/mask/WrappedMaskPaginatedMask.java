@@ -15,6 +15,7 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
+import io.github.projectunified.craftux.common.Element;
 import io.github.projectunified.craftux.common.Mask;
 import io.github.projectunified.craftux.mask.MaskPaginatedMask;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
@@ -28,13 +29,15 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class WrappedMaskPaginatedMask extends WrappedPaginatedMask<MaskPaginatedMask> {
+    private List<Mask> masks;
+
     public WrappedMaskPaginatedMask(MaskBuilder.Input input) {
         super(input);
     }
 
     @Override
     protected MaskPaginatedMask createPaginatedMask(Map<String, Object> section) {
-        List<Mask> masks = MaskUtil.createChildMasksAsList(this, section).stream().map(Mask.class::cast).collect(Collectors.toList());
+        masks = MaskUtil.createChildMasksAsList(this, section).stream().map(Mask.class::cast).collect(Collectors.toList());
         return new MaskPaginatedMask() {
             @Override
             public @NotNull List<Mask> getMasks(@NotNull UUID uuid) {
@@ -52,5 +55,17 @@ public class WrappedMaskPaginatedMask extends WrappedPaginatedMask<MaskPaginated
     protected void handleSignal(MaskPaginatedMask mask, UUID uuid, Signal signal) {
         super.handleSignal(mask, uuid, signal);
         MaskUtil.handleSignal(uuid, mask.getMasks(uuid), signal);
+    }
+
+    @Override
+    public void init() {
+        super.init();
+        Element.handleIfElement(masks, Element::init);
+    }
+
+    @Override
+    public void stop() {
+        Element.handleIfElement(masks, Element::stop);
+        super.stop();
     }
 }
