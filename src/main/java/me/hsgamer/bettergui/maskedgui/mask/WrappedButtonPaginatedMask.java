@@ -26,7 +26,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class WrappedButtonPaginatedMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
     private List<Button> buttons;
@@ -37,7 +36,7 @@ public class WrappedButtonPaginatedMask extends WrappedPaginatedMask<ButtonPagin
 
     @Override
     protected ButtonPaginatedMask createPaginatedMask(Map<String, Object> section) {
-        buttons = ButtonUtil.createChildButtons(this, section).valueStream().<Button>map(ButtonUtil.ButtonWithInput::craftUXButton).collect(Collectors.toList());
+        buttons = ButtonUtil.createChildButtons(this, section).craftUXButtonList();
         return new ButtonPaginatedMask(MaskSlotUtil.of(section, this)) {
             @Override
             public @NotNull List<Button> getButtons(@NotNull UUID uuid) {

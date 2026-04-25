@@ -16,6 +16,8 @@
 package me.hsgamer.bettergui.maskedgui.mask;
 
 import io.github.projectunified.craftux.common.ActionItem;
+import io.github.projectunified.craftux.common.Button;
+import io.github.projectunified.craftux.common.Element;
 import io.github.projectunified.craftux.common.Position;
 import me.hsgamer.bettergui.api.button.WrappedButton;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
@@ -27,7 +29,6 @@ import me.hsgamer.bettergui.maskedgui.util.MaskSlotUtil;
 import me.hsgamer.bettergui.util.StringReplacerApplier;
 import me.hsgamer.hscore.common.MapUtils;
 import me.hsgamer.hscore.common.Validate;
-import me.hsgamer.hscore.minecraft.gui.button.Button;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,8 +43,8 @@ public class ProgressMask implements WrappedMask {
     private Function<UUID, List<Position>> maskSlot = uuid -> Collections.emptyList();
     private String currentValue = "0";
     private String maxValue = "100";
-    private Button completeButton = Button.EMPTY;
-    private Button incompleteButton = Button.EMPTY;
+    private Button completeButton = (uuid, actionItem) -> false;
+    private Button incompleteButton = (uuid, actionItem) -> false;
 
     public ProgressMask(MaskBuilder.Input input) {
         this.menu = input.menu;
@@ -71,10 +72,10 @@ public class ProgressMask implements WrappedMask {
 
         Map<Position, Consumer<ActionItem>> buttonMap = new HashMap<>();
         for (int i = 0; i < completeSize; i++) {
-            buttonMap.put(slots.get(i), new ButtonUtil.CraftUXButton(completeButton).apply(uuid));
+            buttonMap.put(slots.get(i), completeButton.apply(uuid));
         }
         for (int i = completeSize; i < slotsSize; i++) {
-            buttonMap.put(slots.get(i), new ButtonUtil.CraftUXButton(incompleteButton).apply(uuid));
+            buttonMap.put(slots.get(i), incompleteButton.apply(uuid));
         }
         return buttonMap;
     }
@@ -102,24 +103,20 @@ public class ProgressMask implements WrappedMask {
 
         completeButton = MapUtils.castOptionalStringObjectMap(MapUtils.getIfFound(section, "complete-button", "complete", "current-button"))
                 .flatMap(map -> ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(menu, name + "_complete_button", map)))
-                .map(Button.class::cast)
-                .orElse(Button.EMPTY);
-        completeButton.init();
+                .<Button>map(ButtonUtil.CraftUXButton::new)
+                .orElse(completeButton);
+        Element.handleIfElement(completeButton, Element::init);
 
         incompleteButton = MapUtils.castOptionalStringObjectMap(MapUtils.getIfFound(section, "incomplete-button", "incomplete", "max-button"))
                 .flatMap(map -> ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(menu, name + "_incomplete_button", map)))
-                .map(Button.class::cast)
-                .orElse(Button.EMPTY);
-        incompleteButton.init();
+                .<Button>map(ButtonUtil.CraftUXButton::new)
+                .orElse(incompleteButton);
+        Element.handleIfElement(incompleteButton, Element::init);
     }
 
     @Override
     public void stop() {
-        if (completeButton != null) {
-            completeButton.stop();
-        }
-        if (incompleteButton != null) {
-            incompleteButton.stop();
-        }
+        Element.handleIfElement(completeButton, Element::stop);
+        Element.handleIfElement(incompleteButton, Element::stop);
     }
 }

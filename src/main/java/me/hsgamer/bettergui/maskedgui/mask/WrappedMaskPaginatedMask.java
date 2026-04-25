@@ -26,7 +26,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class WrappedMaskPaginatedMask extends WrappedPaginatedMask<MaskPaginatedMask> {
     private List<Mask> masks;
@@ -37,7 +36,7 @@ public class WrappedMaskPaginatedMask extends WrappedPaginatedMask<MaskPaginated
 
     @Override
     protected MaskPaginatedMask createPaginatedMask(Map<String, Object> section) {
-        masks = MaskUtil.createChildMasksAsList(this, section).stream().map(Mask.class::cast).collect(Collectors.toList());
+        masks = MaskUtil.createChildMasksAsList(this, section);
         return new MaskPaginatedMask() {
             @Override
             public @NotNull List<Mask> getMasks(@NotNull UUID uuid) {

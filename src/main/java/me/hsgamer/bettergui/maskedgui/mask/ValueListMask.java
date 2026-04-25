@@ -15,6 +15,8 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
+import io.github.projectunified.craftux.common.Button;
+import io.github.projectunified.craftux.common.Element;
 import io.github.projectunified.craftux.mask.ButtonPaginatedMask;
 import io.github.projectunified.maptemplate.MapTemplate;
 import io.github.projectunified.minelib.scheduler.common.task.Task;
@@ -30,7 +32,6 @@ import me.hsgamer.bettergui.util.SchedulerUtil;
 import me.hsgamer.bettergui.util.TickUtil;
 import me.hsgamer.hscore.common.CollectionUtils;
 import me.hsgamer.hscore.common.MapUtils;
-import me.hsgamer.hscore.minecraft.gui.button.Button;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -92,9 +93,9 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
 
         Map<String, Object> replacedButtonSettings = MapUtils.castOptionalStringObjectMap(mapTemplate.apply(templateButton)).orElse(templateButton);
         Button button = ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(getMenu(), String.join("_", getName(), getValueIndicator(), getValueAsString(value), "button"), replacedButtonSettings))
-                .map(Button.class::cast)
-                .orElse(Button.EMPTY);
-        button.init();
+                .<Button>map(ButtonUtil.CraftUXButton::new)
+                .orElseGet(() -> (uuid, item) -> false);
+        Element.handleIfElement(button, Element::init);
 
         Predicate<UUID> viewerPredicate = uuid -> true;
 
@@ -158,8 +159,8 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
         this.configure(section);
         return new ButtonPaginatedMask(MaskSlotUtil.of(section, this)) {
             @Override
-            public @NotNull List<io.github.projectunified.craftux.common.Button> getButtons(@NotNull UUID uuid) {
-                return getPlayerButtons(uuid).stream().map(ButtonUtil.CraftUXButton::new).collect(Collectors.toList());
+            public @NotNull List<Button> getButtons(@NotNull UUID uuid) {
+                return getPlayerButtons(uuid);
             }
         };
     }
@@ -176,7 +177,7 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
         if (updateTask != null) {
             updateTask.cancel();
         }
-        valueEntryMap.values().forEach(playerEntry -> playerEntry.button.stop());
+        valueEntryMap.values().forEach(playerEntry -> Element.handleIfElement(playerEntry.button, Element::stop));
         valueEntryMap.clear();
     }
 

@@ -15,9 +15,9 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
+import io.github.projectunified.craftux.common.Button;
 import io.github.projectunified.craftux.mask.ButtonPaginatedMask;
 import me.hsgamer.bettergui.api.button.BaseWrappedButton;
-import me.hsgamer.bettergui.api.button.WrappedButton;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.ButtonUtil;
 import me.hsgamer.bettergui.maskedgui.util.MaskSlotUtil;
@@ -26,7 +26,6 @@ import me.hsgamer.bettergui.requirement.RequirementApplier;
 import me.hsgamer.bettergui.util.TickUtil;
 import me.hsgamer.hscore.collections.map.CaseInsensitiveStringLinkedMap;
 import me.hsgamer.hscore.common.MapUtils;
-import me.hsgamer.hscore.minecraft.gui.button.Button;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -86,23 +85,23 @@ public class FilteredButtonPaginatedMask extends WrappedPaginatedMask<ButtonPagi
                             .flatMap(MapUtils::castOptionalStringObjectMap)
                             .map(map -> new RequirementApplier(getMenu(), buttonWithInput.input.name + "_filter", map))
                             .orElse(null);
-                    return new ButtonWithFilter(buttonWithInput.button, filterRequirementApplier);
+                    return new ButtonWithFilter(new ButtonUtil.CraftUXButton(buttonWithInput.button), filterRequirementApplier);
                 })
                 .forEach(buttonWithFilterList::add);
 
         return new ButtonPaginatedMask(MaskSlotUtil.of(section, this)) {
             @Override
-            public @NotNull List<io.github.projectunified.craftux.common.Button> getButtons(@NotNull UUID uuid) {
-                return getPlayerButtons(uuid).stream().map(ButtonUtil.CraftUXButton::new).collect(Collectors.toList());
+            public @NotNull List<Button> getButtons(@NotNull UUID uuid) {
+                return getPlayerButtons(uuid);
             }
         };
     }
 
     private static final class ButtonWithFilter {
-        private final WrappedButton button;
+        private final Button button;
         private final @Nullable RequirementApplier filterRequirementApplier;
 
-        private ButtonWithFilter(WrappedButton button, @Nullable RequirementApplier filterRequirementApplier) {
+        private ButtonWithFilter(Button button, @Nullable RequirementApplier filterRequirementApplier) {
             this.button = button;
             this.filterRequirementApplier = filterRequirementApplier;
         }

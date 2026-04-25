@@ -49,7 +49,7 @@ public final class MaskUtil {
                 .orElseGet(Collections::emptyMap);
     }
 
-    public static List<WrappedMask> createChildMasksAsList(WrappedMask mask, Map<String, Object> options) {
+    public static List<Mask> createChildMasksAsList(WrappedMask mask, Map<String, Object> options) {
         return new ArrayList<>(createChildMasks(mask, options).values());
     }
 }

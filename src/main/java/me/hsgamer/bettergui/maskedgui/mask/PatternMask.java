@@ -16,6 +16,8 @@
 package me.hsgamer.bettergui.maskedgui.mask;
 
 import io.github.projectunified.craftux.common.ActionItem;
+import io.github.projectunified.craftux.common.Button;
+import io.github.projectunified.craftux.common.Element;
 import io.github.projectunified.craftux.common.Position;
 import me.hsgamer.bettergui.api.button.WrappedButton;
 import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
@@ -23,7 +25,6 @@ import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.menu.MaskedMenu;
 import me.hsgamer.bettergui.maskedgui.util.ButtonUtil;
 import me.hsgamer.hscore.common.CollectionUtils;
-import me.hsgamer.hscore.minecraft.gui.button.Button;
 import me.hsgamer.hscore.minecraft.gui.object.InventoryPosition;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
 
 public class PatternMask implements WrappedMask {
     private final MaskBuilder.Input input;
-    private final Map<InventoryPosition, Button> buttonMap = new HashMap<>();
+    private final Map<Position, Button> buttonMap = new HashMap<>();
 
     public PatternMask(MaskBuilder.Input input) {
         this.input = input;
@@ -48,11 +49,8 @@ public class PatternMask implements WrappedMask {
     @Override
     public @Nullable Map<Position, Consumer<ActionItem>> apply(@NotNull UUID uuid) {
         return buttonMap.entrySet().stream().collect(Collectors.toMap(
-                entry -> {
-                    InventoryPosition inventoryPosition = entry.getKey();
-                    return Position.of(inventoryPosition.getX(), inventoryPosition.getY());
-                },
-                entry -> new ButtonUtil.CraftUXButton(entry.getValue()).apply(uuid)
+                Map.Entry::getKey,
+                entry -> entry.getValue().apply(uuid)
         ));
     }
 
@@ -83,23 +81,23 @@ public class PatternMask implements WrappedMask {
             char key = keyString.isEmpty() ? ' ' : keyString.charAt(0);
             List<InventoryPosition> slots = patternMap.get(key);
             if (slots != null) {
-                for (InventoryPosition position : slots) {
-                    buttonMap.put(position, entry.getValue());
+                for (InventoryPosition inventoryPosition : slots) {
+                    buttonMap.put(Position.of(inventoryPosition.getX(), inventoryPosition.getY()), new ButtonUtil.CraftUXButton(entry.getValue()));
                 }
             }
         }
 
-        buttonMap.values().forEach(Button::init);
+        Element.handleIfElement(buttonMap.values(), Element::init);
     }
 
     @Override
     public void stop() {
-        buttonMap.values().forEach(Button::stop);
+        Element.handleIfElement(buttonMap.values(), Element::stop);
         buttonMap.clear();
     }
 
     @Override
     public void refresh(UUID uuid) {
-        ButtonUtil.refreshButtons(uuid, buttonMap.values());
+        ButtonUtil.refreshCraftUXButtons(uuid, buttonMap.values());
     }
 }

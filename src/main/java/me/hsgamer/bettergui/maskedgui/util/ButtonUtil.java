@@ -25,7 +25,6 @@ import me.hsgamer.hscore.common.MapUtils;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
 import me.hsgamer.hscore.minecraft.gui.button.DisplayButton;
 import me.hsgamer.hscore.minecraft.gui.event.ViewerEvent;
-import me.hsgamer.hscore.ui.property.Initializable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -148,11 +147,11 @@ public final class ButtonUtil {
             return valueStream().collect(Collectors.toList());
         }
 
-        public Map<String, CraftUXButton> craftUXButtonMap() {
+        public Map<String, io.github.projectunified.craftux.common.Button> craftUXButtonMap() {
             return map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().craftUXButton(), (a, b) -> b, LinkedHashMap::new));
         }
 
-        public List<CraftUXButton> craftUXButtonList() {
+        public List<io.github.projectunified.craftux.common.Button> craftUXButtonList() {
             return valueStream().map(ButtonWithInput::craftUXButton).collect(Collectors.toList());
         }
     }
